@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-  
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -28,4 +28,4 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push Docker Image
-        run: docker push spring-boot-app:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/spring-boot-app:latest
