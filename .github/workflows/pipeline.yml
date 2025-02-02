@@ -14,14 +14,14 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      # Setter opp Java JDK 11
+      - name: Set up Java JDK 11
         uses: actions/setup-java@v2
         with:
-          java-version: '21'
+          java-version: '11'  # Velg Java-versjon
+          distribution: 'zulu'  # Velg Java-distribusjon (kan være 'zulu', 'openjdk', eller 'adoptopenjdk')
 
-      - name: Build project with Maven
-        run: mvn clean install
-
+      # Installer Docker og bygg bilde
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 

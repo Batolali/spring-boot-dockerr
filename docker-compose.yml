@@ -1,6 +1,7 @@
-version: '3'
+version: '3.8'
+
 services:
   spring-boot-app:
     image: coursera-spring-hello-world-spring-boot-app:latest
     ports:
-      - "8080:80"  # Mapper port 80 i containeren til port 8080 på verten
+      - "8080:8080"  # Mapper port 8080 i containeren til port 8080 på verten
