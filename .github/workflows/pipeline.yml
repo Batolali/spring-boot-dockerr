@@ -1,5 +1,8 @@
 name: CI/CD Pipeline
 
+env:
+  batol333:${{secrets.batol333}}
+  
 on:
   push:
     branches:
