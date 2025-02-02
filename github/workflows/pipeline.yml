@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '11'  # Velg Java-versjon
-          distribution: 'adoptopenjdk'  # Velg Java-distribusjon (f.eks. adoptopenjdk, zulu, openjdk)
+          distribution: 'zulu'  # Velg Java-distribusjon (f.eks. adoptopenjdk, zulu, openjdk)
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
