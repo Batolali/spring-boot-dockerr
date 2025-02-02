@@ -1,27 +1,25 @@
-# Bruk OpenJDK 21 som base image
-FROM openjdk:21-jdk-slim AS build
+# Stage 1: Build the application with Maven
+FROM maven:3.9-eclipse-temurin-21 AS build
 
-# Sett arbeidskatalog
+WORKDIR /build
+
+# Copy Maven pom.xml and the source code
+COPY ./pom.xml ./
+COPY ./src ./src
+
+# Build the application and skip tests for faster build
+RUN mvn clean package -DskipTests
+
+# Stage 2: Set up the runtime environment
+FROM eclipse-temurin:21-jre
+
 WORKDIR /app
 
-# Kopier prosjektfilene (inkludert mvnw og pom.xml)
-COPY . . 
+# Copy the packaged jar from the build stage to the runtime stage
+COPY --from=build /build/target/*.jar app.jar
 
-# Gi mvnw kjørbar tillatelse (hvis ikke allerede satt)
-RUN chmod +x ./mvnw
+# Expose the port that the Spring Boot app will run on
+EXPOSE 80
 
-# Bygg prosjektet med Maven Wrapper (det vil bruke mvnw for å bygge)
-RUN ./mvnw clean install -DskipTests
-
-# Sett opp produksjonsmiljø
-FROM openjdk:21-jdk-slim AS production
-
-# Sett arbeidskatalog
-WORKDIR /app
-
-# Kopier bare de nødvendige filene (byggeartefakter fra build stage)
-# Endre filnavnet til det som Maven har generert: coursera-0.0.1-SNAPSHOT.jar
-COPY --from=build /app/target/coursera-0.0.1-SNAPSHOT.jar .
-
-# Start applikasjonen
-CMD ["java", "-jar", "coursera-0.0.1-SNAPSHOT.jar"]
+# Run the Spring Boot application
+CMD ["java", "-jar", "app.jar"]
