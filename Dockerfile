@@ -1,11 +1,14 @@
-# Start fra et offisielt OpenJDK-bilde
-FROM openjdk:21-jdk
+# Bruk et OpenJDK 21-bilde som base
+FROM openjdk:21-jdk-slim AS build
 
-# Sett arbeidskatalogen til /app
+# Installer Maven
+RUN apt-get update && apt-get install -y maven
+
+# Sett arbeidskatalog
 WORKDIR /app
 
-# Kopier .jar-filen til containeren
-COPY target/coursera-0.0.1-SNAPSHOT.jar /app/spring-boot-app.jar
+# Kopier prosjektfilene
+COPY . .
 
-# Kjør applikasjonen
-CMD ["java", "-jar", "/app/spring-boot-app.jar"]
+# Bygg prosjektet med Maven
+RUN mvn clean install
