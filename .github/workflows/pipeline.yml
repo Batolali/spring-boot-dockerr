@@ -3,36 +3,30 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Trigger workflow on push to the main branch
-  workflow_dispatch:  # Allow manual triggering of the workflow
+      - main
+  workflow_dispatch:
 
 jobs:
   docker-build-push:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
-
+    runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the code from the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Configure AWS credentials for Docker and ECR access
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}  # Bruker AWS_REGION her
 
-      # Step 3: Log in to Amazon ECR
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 4: Build the Docker image with the tag of the repository
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ECR_REPO }}:latest .
+          docker build -t 034362073526.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coursera/spring-boot-docker:latest .
 
-      # Step 5: Push the Docker image to Amazon ECR
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push ${{ secrets.ECR_REPO }}:latest
+          docker push 034362073526.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coursera/spring-boot-docker:latest
