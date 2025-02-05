@@ -17,9 +17,11 @@ jobs:
       - name: Debug AWS Secrets
         run: |
           echo "AWS_REGION=${{ secrets.AWS_REGION }}"
-          echo "AWS_ACCOUNT_ID length: ${#AWS_ACCOUNT_ID}"  
-          if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" ]]; then 
-            echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY! Check GitHub Secrets."
+          echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
+          
+          # Stop workflow hvis AWS_ACCOUNT_ID er tom eller feil
+          if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" || "${{ secrets.AWS_ACCOUNT_ID }}" == "***" ]]; then 
+            echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY OR MASKED! Check GitHub Secrets."
             exit 1
           fi
 
@@ -38,7 +40,7 @@ jobs:
         run: |
           AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
           AWS_REGION="${{ secrets.AWS_REGION }}"
-          
+
           if [[ -z "$AWS_ACCOUNT_ID" || "$AWS_ACCOUNT_ID" == "***" ]]; then 
             echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY OR MASKED! Check GitHub Secrets."
             exit 1
@@ -50,11 +52,15 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $ECR_REPOSITORY:$GITHUB_SHA .
+          docker build -t coursera/spring-boot-docker .
+
+      - name: Tag Docker image
+        run: |
+          docker tag coursera/spring-boot-docker:latest $ECR_REPOSITORY:latest
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push $ECR_REPOSITORY:$GITHUB_SHA
+          docker push $ECR_REPOSITORY:latest
 
       - name: Deployment Complete
         run: echo "✅ Docker image pushed successfully to ECR!"
