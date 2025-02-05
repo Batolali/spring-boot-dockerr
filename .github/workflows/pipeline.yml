@@ -18,8 +18,8 @@ jobs:
         run: |
           echo "AWS_REGION=${{ secrets.AWS_REGION }}"
           echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
-          
-          # Stop workflow hvis AWS_ACCOUNT_ID er tom eller feil
+
+          # Sjekk om AWS_ACCOUNT_ID er satt riktig
           if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" || "${{ secrets.AWS_ACCOUNT_ID }}" == "***" ]]; then 
             echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY OR MASKED! Check GitHub Secrets."
             exit 1
@@ -45,8 +45,11 @@ jobs:
             echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY OR MASKED! Check GitHub Secrets."
             exit 1
           fi
-          
+
+          # Definer ECR repository URL
           ECR_REPOSITORY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/coursera/spring-boot-docker"
+          
+          # Lagre ECR_REPOSITORY som en miljøvariabel
           echo "ECR_REPOSITORY=$ECR_REPOSITORY" >> $GITHUB_ENV
           echo "✅ ECR_REPOSITORY is set to: $ECR_REPOSITORY"
 
