@@ -17,9 +17,9 @@ jobs:
       - name: Debug AWS Secrets
         run: |
           echo "AWS_REGION=${{ secrets.AWS_REGION }}"
-          echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
+          echo "AWS_ACCOUNT_ID starts with: ${AWS_ACCOUNT_ID:0:4}..."  
           if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" ]]; then 
-            echo "❌ AWS_ACCOUNT_ID is EMPTY! Check GitHub Secrets."
+            echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY! Check GitHub Secrets."
             exit 1
           fi
 
@@ -36,8 +36,12 @@ jobs:
 
       - name: Define ECR repository URL
         run: |
+          if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" ]]; then 
+            echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY! Check GitHub Secrets."
+            exit 1
+          fi
           echo "ECR_REPOSITORY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coursera/spring-boot-docker" >> $GITHUB_ENV
-          cat $GITHUB_ENV  # Debugging - sjekker at verdien er riktig
+          cat $GITHUB_ENV  
 
       - name: Build Docker image
         run: |
