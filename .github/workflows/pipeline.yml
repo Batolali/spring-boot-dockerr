@@ -10,26 +10,38 @@ jobs:
   docker-build-push:
     runs-on: ubuntu-latest
     steps:
+      # Sjekk ut kildekoden fra repositoryet
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Debug-utskrift for å kontrollere at AWS-regionen (fra secrets) er korrekt
       - name: Debug AWS Secrets
         run: |
-          echo "AWS Region: ${{ secrets.AWS_REGION }}"
+          echo "AWS Region from secrets: ${{ secrets.AWS_REGION }}"
 
+      # Konfigurer AWS-legitimasjonene for workflowen
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-north-1  # Oppdatert til riktig region
+          # Bruk enten en statisk region eller hent den fra secrets om du har lagret den der:
+          aws-region: ${{ secrets.AWS_REGION }}  # Hvis du har lagret regionen som secret
+          # aws-region: eu-north-1            # Eller angi regionen direkte, f.eks. eu-north-1
           role-session-name: github-actions
+          # Hvis du trenger å anta en rolle, kan du legge til:
+          # role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<ROLE_NAME>
 
+      # Logg inn til Amazon ECR
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Bygg Docker-imaget
       - name: Build Docker image
-        run: docker build -t 034362073526.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest .
+        run: |
+          docker build -t 034362073526.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest .
 
+      # Push Docker-imaget til Amazon ECR
       - name: Push Docker image to Amazon ECR
-        run: docker push 034362073526.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest
+        run: |
+          docker push 034362073526.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest
