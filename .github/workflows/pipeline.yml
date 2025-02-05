@@ -17,7 +17,7 @@ jobs:
 
       # 2️⃣ Debug-utskrift for å kontrollere at AWS-regionen er satt
       - name: Debug AWS Secrets
-        run: echo "Using AWS Region: ${{ secrets.AWS_REGION }}"
+        run: echo "Using AWS Region: \${{ secrets.AWS_REGION }}"
 
       # 3️⃣ Konfigurer AWS-legitimasjonene for GitHub Actions
       - name: Configure AWS Credentials
