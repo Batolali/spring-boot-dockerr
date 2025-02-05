@@ -46,8 +46,8 @@ jobs:
             exit 1
           fi
 
-          # Definer ECR repository URL
-          ECR_REPOSITORY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/coursera/spring-boot-docker"
+          # Bruker det nye repository-navnet: "spring-boot-app"
+          ECR_REPOSITORY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/spring-boot-app"
           
           # Lagre ECR_REPOSITORY som en miljøvariabel
           echo "ECR_REPOSITORY=$ECR_REPOSITORY" >> $GITHUB_ENV
@@ -55,15 +55,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t coursera/spring-boot-docker .
+          docker build -t spring-boot-app .
 
       - name: Tag Docker image
         run: |
-          docker tag coursera/spring-boot-docker:latest $ECR_REPOSITORY:latest
-
-      - name: Push Docker image to Amazon ECR
-        run: |
-          docker push $ECR_REPOSITORY:latest
-
-      - name: Deployment Complete
-        run: echo "✅ Docker image pushed successfully to ECR!"
+          docker tag spring-boot-app:latest $ECR_R
