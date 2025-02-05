@@ -4,50 +4,43 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: {}  # Lar deg trigge workflow manuelt fra GitHub
+  workflow_dispatch: {}
 
 jobs:
   docker-build-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Sjekk ut koden fra repoet
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Debug: Skriv ut AWS-region for feilsøking
       - name: Debug AWS Secrets
         run: |
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
-          echo "Using AWS Region: $AWS_REGION"
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}"
+          echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
 
-      # 3️⃣ Konfigurer AWS-legitimasjonene
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
 
-      # 4️⃣ Logg inn til Amazon ECR
       - name: Log in to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 5️⃣ Sett ECR repository URL som miljøvariabel
       - name: Define ECR repository URL
         run: echo "ECR_REPOSITORY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/coursera/spring-boot-docker" >> $GITHUB_ENV
 
-      # 6️⃣ Bygg Docker-imaget
       - name: Build Docker image
         run: |
           docker build -t $ECR_REPOSITORY:latest .
 
-      # 7️⃣ Push Docker-imaget til Amazon ECR
       - name: Push Docker image to Amazon ECR
         run: |
           docker push $ECR_REPOSITORY:latest
 
-      # 8️⃣ Fullført melding
       - name: Deployment Complete
-        run: echo "✅ Docker image pushed successfully to ECR!"
+        run: echo " Docker image pushed successfully to ECR!"
