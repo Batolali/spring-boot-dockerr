@@ -1,62 +1,33 @@
-name: CI/CD Pipeline
+name: Build and Push Docker Image
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: {}
 
 jobs:
-  docker-build-push:
+  docker:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Debug AWS Secrets
-        run: |
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}"
-          echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
-
-          # Sjekk om AWS_ACCOUNT_ID er satt riktig
-          if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" || "${{ secrets.AWS_ACCOUNT_ID }}" == "***" ]]; then 
-            echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY OR MASKED! Check GitHub Secrets."
-            exit 1
-          fi
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+        uses: actions/checkout@v3
 
       - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Define ECR repository URL
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
-          AWS_REGION="${{ secrets.AWS_REGION }}"
-
-          if [[ -z "$AWS_ACCOUNT_ID" || "$AWS_ACCOUNT_ID" == "***" ]]; then 
-            echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY OR MASKED! Check GitHub Secrets."
-            exit 1
-          fi
-
-          # Bruker det nye repository-navnet: "spring-boot-app"
-          ECR_REPOSITORY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/spring-boot-app"
-          
-          # Lagre ECR_REPOSITORY som en miljøvariabel
-          echo "ECR_REPOSITORY=$ECR_REPOSITORY" >> $GITHUB_ENV
-          echo "✅ ECR_REPOSITORY is set to: $ECR_REPOSITORY"
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set default.region $AWS_REGION
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
       - name: Build Docker image
         run: |
-          docker build -t spring-boot-app .
+          docker build -t ${{ secrets.ECR_REPOSITORY_URL }} .
 
-      - name: Tag Docker image
+      - name: Push Docker image
         run: |
-          docker tag spring-boot-app:latest $ECR_R
+          docker push ${{ secrets.ECR_REPOSITORY_URL }}
