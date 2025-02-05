@@ -13,22 +13,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug AWS Region
-        run: echo "AWS Region is ${{ secrets.AWS_REGION }}"
+      - name: Debug AWS Secrets
+        run: |
+          echo "AWS Region: ${{ secrets.AWS_REGION }}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Endre til riktig region
+          aws-region: eu-north-1  # Oppdatert til riktig region
           role-session-name: github-actions
 
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.ECR_REPO }}:latest .
+        run: docker build -t 034362073526.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest .
 
       - name: Push Docker image to Amazon ECR
-        run: docker push ${{ secrets.ECR_REPO }}:latest
+        run: docker push 034362073526.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest
