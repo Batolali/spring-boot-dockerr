@@ -17,7 +17,7 @@ jobs:
       - name: Debug AWS Secrets
         run: |
           echo "AWS_REGION=${{ secrets.AWS_REGION }}"
-          echo "AWS_ACCOUNT_ID length: ${#AWS_ACCOUNT_ID}"  
+          echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}"
           if [[ -z "${{ secrets.AWS_ACCOUNT_ID }}" ]]; then 
             echo "❌ ERROR: AWS_ACCOUNT_ID is EMPTY! Check GitHub Secrets."
             exit 1
