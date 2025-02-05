@@ -1,6 +1,16 @@
-version: '3'
+version: "3.8"
+
 services:
-  spring-boot-app:
-    image: coursera-spring-hello-world-spring-boot-app:latest
+  app:
+    image: spring-boot-app-image
+    build: .
     ports:
-      - "8080:80"  # Mapper port 80 i containeren til port 8080 på verten
+      - "80:80"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
